@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工科数学分析（上）· 真题数据库</title>
+<link rel="stylesheet" href="assets/katex/katex.min.css">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">∫</div>
+    <div class="bt">
+      <h1>工科数学分析（上）· 真题数据库<span class="ver">Ver 2.4.1</span></h1>
+      <p><span class="src">题库来源《大邮数学集》</span>　·　知识点范围：第 1 章 函数、极限、连续　·　第 2 章 一元函数微分学及其应用 §1—6（平面曲线曲率之前）</p>
+    </div>
+  </div>
+  <div class="contact">
+    <button class="cbtn" type="button">联系作者</button>
+    <div class="cpop">
+      <div class="crow"><span class="ck">邮箱 / QQ</span><a href="mailto:3699035493@qq.com">3699035493@qq.com</a></div>
+      <div class="crow"><span class="ck">GitHub</span>
+        <a href="https://github.com/SZM1421" target="_blank" rel="noopener">github.com/SZM1421</a></div>
+    </div>
+  </div>
+  <div class="scope">
+    <div class="sc-k">适用范围</div>
+    <div class="sc-v">2026 届大一第一学期</div>
+    <div class="sc-e">期中考试</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-hd">
+      <span class="sh-t">知识结构</span>
+      <span class="sh-hint" title="数字含交叉考点与可用解法，所以各级相加会大于 223">数字含相关考点</span>
+      <button class="side-toggle" id="sideToggle" type="button">收起</button>
+    </div>
+    <button class="fav-entry" id="favEntry" type="button">☆ 收藏题目 <span id="favCount">0</span></button>
+    <nav id="tree" class="tree"></nav>
+
+  </aside>
+
+  <main id="main" class="main"></main>
+</div>
+
+<div id="drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-hd">
+    <div>
+      <div class="dnum" id="dTitle">相似题</div>
+      <div class="dsub" id="dSub"></div>
+    </div>
+    <button id="dClose" class="close">×</button>
+  </div>
+  <div class="drawer-bd" id="dBody"></div>
+</div>
+<div id="mask" class="mask"></div>
+
+<script src="assets/katex/katex.min.js"></script>
+<script src="assets/katex/contrib/auto-render.min.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
