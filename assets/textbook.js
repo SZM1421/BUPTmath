@@ -13,7 +13,8 @@
 window.BOOK = {
   title: "《工科数学分析基础》上册",
   fileRel: "../工科数学分析基础 上册.pdf",
-  httpPath: "/textbook.pdf",
+  httpPath: "/textbook.pdf",                                  /* 本地 启动.bat 用 */
+  remotePath: "https://waline.sybuscloud.top/textbook.pdf",   /* 公网 GitHub Pages 用 */
   offset: 22,
 
   /* 知识点 id → 教材印刷页码 */
@@ -47,6 +48,9 @@ window.bookHref = function (kpid) {
   var b = window.bookPage(kpid);
   if (!b) return "";
   var B = window.BOOK;
-  var base = location.protocol === "file:" ? B.fileRel : B.httpPath;
+  var base;
+  if (location.protocol === "file:") base = B.fileRel;
+  else if (/\.github\.io$/.test(location.hostname) && B.remotePath) base = B.remotePath;
+  else base = B.httpPath;
   return encodeURI(base) + "#page=" + b.physical;
 };
