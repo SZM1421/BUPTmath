@@ -715,20 +715,11 @@ function boot() {
   $("#dClose").addEventListener("click", closeDrawer);
   $("#mask").addEventListener("click", closeDrawer);
 
-  const vb = $("#verBtn"), vp = $("#verPop");
-  if (vb && vp) {
-    vb.addEventListener("click", e => { e.stopPropagation(); vp.hidden = !vp.hidden; });
-    document.addEventListener("click", e => {
-      if (!vp.hidden && !vp.contains(e.target) && e.target !== vb) vp.hidden = true;
-    });
-  }
-
   document.addEventListener("keydown", e => {
     const el = e.target, tag = (el && el.tagName || "").toLowerCase();
     const typing = tag === "input" || tag === "textarea" || tag === "select" || (el && el.isContentEditable);
     if (e.key === "Escape") {
       closeDrawer();
-      if (vp) vp.hidden = true;
       if (typing && el.blur) el.blur();
       return;
     }

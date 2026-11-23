@@ -332,7 +332,7 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
 .bk:hover{background:var(--blue); color:#fff}
 .bk.large{font-size:12.5px; font-weight:600; padding:5px 13px}
 
-/* ---------- 搜索框、试卷筛选、上下节导航、更新记录 ---------- */
+/* ---------- 搜索框、试卷筛选、上下节导航 ---------- */
 .search-wrap{padding:8px 12px 0}
 .srcfilter{
   font-family:"Microsoft YaHei",sans-serif; font-size:12px; padding:6px 9px;
@@ -348,19 +348,10 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
 }
 .kpnb:last-child{text-align:right}
 .kpnb:hover{border-color:var(--blue); color:var(--blue)}
-.ver{cursor:pointer}
-.verpop{
-  position:absolute; top:56px; left:22px; z-index:40; width:360px; max-width:calc(100vw - 44px);
-  background:#fff; border:1px solid var(--line); border-radius:9px; box-shadow:var(--shadow); padding:12px 15px;
-}
-.verpop[hidden]{display:none}
-.vph{font-family:"Microsoft YaHei",sans-serif; font-size:12.5px; font-weight:600; color:var(--blue); margin-bottom:6px}
-.verpop ul{margin:0; padding-left:18px}
-.verpop li{font-family:"Microsoft YaHei",sans-serif; font-size:11.5px; color:var(--ink2); line-height:1.9}
 
 @media print{
   @page{size:A4; margin:16mm 14mm}
-  .topbar,.side,.drawer,.mask,.bar,.qact,.crumb,.kfoot,.star,.fav-entry,.bk,.kpnav,.verpop,
+  .topbar,.side,.drawer,.mask,.bar,.qact,.crumb,.kfoot,.star,.fav-entry,.bk,.kpnav,
   .gb-entry,.gb-panel,.gb-mask{display:none!important}
   .layout{display:block}
   .main{max-width:none; padding:0}
