@@ -38,7 +38,7 @@ a{color:var(--blue); text-decoration:none}
   color:#8a7a55; border:1px solid #e0d3b4; background:#fdfaf2; border-radius:20px;
   padding:1px 8px; margin-left:10px; vertical-align:2px;
 }
-.contact{position:relative; flex:0 0 auto; margin-left:10px}
+.contact{position:relative; flex:0 0 auto; margin-left:10px; align-self:stretch; display:flex; align-items:center}
 .cbtn{
   font-family:"Microsoft YaHei",sans-serif; font-size:10.5px; color:var(--ink3);
   background:none; border:0; padding:1px 2px; cursor:pointer; letter-spacing:.5px;
@@ -46,7 +46,7 @@ a{color:var(--blue); text-decoration:none}
 }
 .cbtn:hover,.contact:focus-within .cbtn{color:var(--blue); border-bottom-color:var(--brand-line)}
 .cpop{
-  display:none; position:absolute; right:0; top:calc(100% + 10px); z-index:80; width:272px;
+  display:none; position:absolute; right:0; top:100%; z-index:80; width:272px;
   background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px;
   box-shadow:0 8px 28px rgba(60,45,25,.16); font-family:"Microsoft YaHei",sans-serif;
   font-size:12px; line-height:1.7; color:var(--ink2); text-align:left;
@@ -280,7 +280,7 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
   .scope{display:none}
 }
 @media (max-width:760px){
-  .cpop{right:0; width:min(260px, calc(100vw - 20px))}
+  .cpop{right:0; width:min(260px, calc(100vw - 24px))}
 }
 @media (max-width:1080px){
   .layout{grid-template-columns:1fr}
