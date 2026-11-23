@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>工科数学分析（上）· 真题数据库</title>
+<link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="stylesheet" href="assets/katex/katex.min.css">
 <link rel="stylesheet" href="assets/app.css">
 </head>
@@ -11,9 +12,18 @@
 
 <header class="topbar">
   <div class="brand">
-    <div class="logo">∫</div>
+    <div class="logo"><img src="assets/bupt-logo.png" alt="北京邮电大学校徽" title="北京邮电大学"></div>
     <div class="bt">
-      <h1>工科数学分析（上）· 真题数据库<span class="ver">Ver 2.4.1</span></h1>
+      <h1>工科数学分析（上）· 真题数据库<button type="button" class="ver" id="verBtn" title="查看更新记录">Ver 2.4.1</button></h1>
+    <div id="verPop" class="verpop" hidden>
+      <div class="vph">Ver 2.4.1　更新记录</div>
+      <ul>
+        <li>页头改用北京邮电大学校徽，交互配色对齐校徽蓝</li>
+        <li>知识点可跳转教材正文对应页</li>
+        <li>精讲定义 / 定理编号统一，18 道题考点归属校订</li>
+        <li>收藏题目、题型与试卷筛选、Ctrl+P 打印优化</li>
+      </ul>
+    </div>
       <p><span class="src">题库来源《大邮数学集》</span>　·　知识点范围：第 1 章 函数、极限、连续　·　第 2 章 一元函数微分学及其应用 §1—6（平面曲线曲率之前）</p>
     </div>
   </div>
@@ -25,6 +35,7 @@
         <a href="https://github.com/SZM1421" target="_blank" rel="noopener">github.com/SZM1421</a></div>
     </div>
   </div>
+  <button class="gb-entry" id="gbBtn" type="button" title="打开留言板">💬 留言板</button>
   <div class="scope">
     <div class="sc-k">适用范围</div>
     <div class="sc-v">2026 届大一第一学期</div>
@@ -36,8 +47,10 @@
   <aside class="side">
     <div class="side-hd">
       <span class="sh-t">知识结构</span>
-      <span class="sh-hint" title="数字含交叉考点与可用解法，所以各级相加会大于 223">数字含相关考点</span>
       <button class="side-toggle" id="sideToggle" type="button">收起</button>
+    </div>
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="搜索题干关键词" autocomplete="off" spellcheck="false">
     </div>
     <button class="fav-entry" id="favEntry" type="button">☆ 收藏题目 <span id="favCount">0</span></button>
     <nav id="tree" class="tree"></nav>
@@ -59,9 +72,91 @@
 </div>
 <div id="mask" class="mask"></div>
 
+<!-- ---------- 留言板（Valine） ---------- -->
+<div id="gbMask" class="gb-mask"></div>
+<div id="gbPanel" class="gb-panel" role="dialog" aria-modal="true" aria-label="留言板" aria-hidden="true">
+  <div class="gb-hd">
+    <div class="gb-title">💬 留言板</div>
+    <button id="gbClose" class="gb-close" type="button" aria-label="关闭">×</button>
+  </div>
+  <div class="gb-bd">
+    <div id="gbStatus" class="gb-status"></div>
+    <div id="vcomments"></div>
+  </div>
+</div>
+
 <script src="assets/katex/katex.min.js"></script>
 <script src="assets/katex/contrib/auto-render.min.js"></script>
 <script src="assets/data.js"></script>
+<script src="assets/textbook.js"></script>
 <script src="assets/app.js"></script>
+<script>
+/* ================= 留言板（Twikoo）配置 =================
+ * 后端是自建的 Twikoo 服务，地址如下（已备案子域名 + HTTPS）。
+ * 如需换地址，只改 TWIKOO_ENV 即可。
+ * ===================================================== */
+var TWIKOO_ENV  = "https://waline.sybuscloud.top";
+var TWIKOO_PATH = "/guestbook";   // 全站共用一个留言板
+
+(function () {
+  var btn = document.getElementById("gbBtn");
+  var panel = document.getElementById("gbPanel");
+  var mask = document.getElementById("gbMask");
+  var closeBtn = document.getElementById("gbClose");
+  var statusEl = document.getElementById("gbStatus");
+  var inited = false;
+  var CDN = [
+    "https://cdn.jsdelivr.net/npm/twikoo@1/dist/twikoo.min.js",
+    "https://unpkg.com/twikoo@1/dist/twikoo.min.js",
+    "https://fastly.jsdelivr.net/npm/twikoo@1/dist/twikoo.min.js"
+  ];
+
+  function open() {
+    panel.classList.add("open");
+    mask.classList.add("on");
+    panel.setAttribute("aria-hidden", "false");
+    init();
+  }
+  function close() {
+    panel.classList.remove("open");
+    mask.classList.remove("on");
+    panel.setAttribute("aria-hidden", "true");
+  }
+  function loadScript(i) {
+    if (i >= CDN.length) {
+      statusEl.textContent = "留言组件加载失败，请检查网络后刷新重试。";
+      return;
+    }
+    var s = document.createElement("script");
+    s.src = CDN[i];
+    s.async = true;
+    s.onload = function () { if (window.twikoo) start(); else loadScript(i + 1); };
+    s.onerror = function () { loadScript(i + 1); };
+    document.head.appendChild(s);
+  }
+  function init() {
+    if (inited) return;
+    inited = true;
+    if (window.twikoo) { start(); return; }
+    statusEl.textContent = "正在加载留言组件…";
+    loadScript(0);
+  }
+  function start() {
+    statusEl.textContent = "";
+    if (!window.twikoo) return;
+    window.twikoo.init({
+      el: "#vcomments",
+      envId: TWIKOO_ENV,
+      path: TWIKOO_PATH,
+      lang: "zh-CN"
+    });
+  }
+
+  if (btn) btn.addEventListener("click", open);
+  if (closeBtn) closeBtn.addEventListener("click", close);
+  if (mask) mask.addEventListener("click", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+})();
+</script>
 </body>
 </html>
