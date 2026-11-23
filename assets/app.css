@@ -28,37 +28,41 @@ a{color:var(--blue); text-decoration:none}
   display:grid; place-items:center;
 }
 .logo img{display:block; width:100%; height:100%; object-fit:contain}
+.bt{min-width:0}
 .bt h1{margin:0; font-size:16px; letter-spacing:.4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.bt p{margin:1px 0 0; font-size:11.5px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif}
+.bt p{margin:1px 0 0; font-size:11.5px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .bt p .src{color:#8a6d33; font-weight:600; letter-spacing:.3px}
 .ver{
   font-family:"Microsoft YaHei",sans-serif; font-size:10px; font-weight:500; letter-spacing:.4px;
   color:#8a7a55; border:1px solid #e0d3b4; background:#fdfaf2; border-radius:20px;
   padding:1px 8px; margin-left:10px; vertical-align:2px;
 }
-.contact{position:relative; flex:0 0 auto; margin-left:4px}
+.contact{position:fixed; right:16px; bottom:16px; z-index:25; margin:0}
 .cbtn{
-  font-family:"Microsoft YaHei",sans-serif; font-size:11.5px; color:var(--ink3);
-  background:none; border:0; padding:4px 2px; cursor:pointer; letter-spacing:.5px;
-  border-bottom:1px dashed transparent; transition:.15s;
+  font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:var(--ink3);
+  background:rgba(255,255,255,.88); border:1px solid var(--line); border-radius:16px;
+  padding:4px 10px; cursor:pointer; letter-spacing:.5px; transition:.15s;
+  box-shadow:0 2px 8px rgba(60,45,25,.08);
 }
-.cbtn:hover,.contact:focus-within .cbtn{color:var(--blue); border-bottom-color:var(--brand-line)}
+.cbtn:hover,.contact:focus-within .cbtn{color:var(--blue); border-color:var(--brand-line)}
 .cpop{
-  display:none; position:absolute; right:0; top:calc(100% + 8px); z-index:80; width:240px;
+  display:none; position:absolute; right:0; bottom:calc(100% + 8px); z-index:80; width:272px;
   background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px;
-  box-shadow:0 8px 28px rgba(60,45,25,.14); font-family:"Microsoft YaHei",sans-serif;
+  box-shadow:0 8px 28px rgba(60,45,25,.16); font-family:"Microsoft YaHei",sans-serif;
   font-size:12px; line-height:1.7; color:var(--ink2); text-align:left;
 }
 .contact:hover .cpop,.contact:focus-within .cpop{display:block}
 .cpop::before{
-  content:""; position:absolute; top:-5px; right:26px; width:9px; height:9px; background:#fff;
-  border-left:1px solid var(--line); border-top:1px solid var(--line); transform:rotate(45deg);
+  content:""; position:absolute; bottom:-5px; right:26px; width:9px; height:9px; background:#fff;
+  border-right:1px solid var(--line); border-bottom:1px solid var(--line); transform:rotate(45deg);
 }
 .crow{display:flex; gap:10px; padding:3px 0}
 .crow + .crow{border-top:1px dashed var(--line2); margin-top:4px; padding-top:7px}
 .ck{flex:0 0 62px; color:var(--ink3); font-size:11px}
 .cpop a{color:var(--blue)}
 .cpop a:hover{color:var(--blue); text-decoration:underline}
+.works{display:flex; flex-direction:column; gap:3px}
 .scope{
   flex:0 0 auto; text-align:right; padding:0 2px 0 22px; margin-left:8px;
   border-left:1px solid var(--line); font-family:"Microsoft YaHei",sans-serif; line-height:1.5;
@@ -352,7 +356,7 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
 @media print{
   @page{size:A4; margin:16mm 14mm}
   .topbar,.side,.drawer,.mask,.bar,.qact,.crumb,.kfoot,.star,.fav-entry,.bk,.kpnav,
-  .gb-entry,.gb-panel,.gb-mask{display:none!important}
+  .contact,.gb-entry,.gb-panel,.gb-mask{display:none!important}
   .layout{display:block}
   .main{max-width:none; padding:0}
   body{background:#fff; font-size:11pt}
@@ -364,14 +368,15 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
   a{color:#000; text-decoration:none}
 }
 
-/* ---------- 留言板（Valine） ---------- */
+/* ---------- 留言板 ---------- */
 .gb-entry{
-  flex:0 0 auto; margin-left:8px; font-family:"Microsoft YaHei",sans-serif;
-  font-size:11.5px; color:var(--ink3); background:none; border:0; padding:4px 2px;
+  flex:0 0 auto; margin-left:12px; font-family:"Microsoft YaHei",sans-serif;
+  font-size:13px; font-weight:600; color:#fff; background:var(--blue);
+  border:1px solid var(--blue); border-radius:20px; padding:7px 16px;
   cursor:pointer; letter-spacing:.5px; white-space:nowrap;
-  border-bottom:1px dashed transparent; transition:.15s;
+  box-shadow:0 3px 10px rgba(0,51,153,.28); transition:.15s;
 }
-.gb-entry:hover{color:var(--blue); border-bottom-color:var(--brand-line)}
+.gb-entry:hover{background:#002a7a; border-color:#002a7a; transform:translateY(-1px); box-shadow:0 5px 14px rgba(0,51,153,.34)}
 .gb-mask{position:fixed; inset:0; background:rgba(20,24,38,.45); opacity:0; pointer-events:none; transition:.2s; z-index:60}
 .gb-mask.on{opacity:1; pointer-events:auto}
 .gb-panel{
@@ -390,7 +395,13 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
 .gb-status{font-family:"Microsoft YaHei",sans-serif; font-size:12px; color:var(--ink3); text-align:center; padding:6px 0}
 .gb-status:empty{display:none}
 @media (max-width:720px){
-  .gb-entry{margin-left:2px; font-size:11px}
+  .topbar{padding:8px 12px; gap:8px}
+  .brand{gap:8px}
+  .logo{width:34px; height:34px; flex-basis:34px}
+  .bt h1{font-size:13.5px}
+  .bt p{font-size:10.5px}
+  .ver{display:none}
+  .gb-entry{margin-left:6px; font-size:12px; padding:6px 12px}
   .gb-panel{width:100vw; max-width:100vw; height:100vh; max-height:100vh; border-radius:0;
     top:0; left:0; transform:translate(0,10px)}
   .gb-panel.open{transform:translate(0,0)}
