@@ -15,7 +15,7 @@ const QCODE = {};
   .sort((a, b) => (TYPE_ORDER[a.type] - TYPE_ORDER[b.type]) || (a.no - b.no))
   .forEach((q, i) => { QCODE[q.id] = String(i + 1).padStart(3, "0"); });
 
-let state = { node: "ch1", showAns: false, simOf: null, simAnchor: null, simIds: [], search: "", view: "tree", typeFilter: "" };
+let state = { node: "ch1", showAns: false, simOf: null, simAnchor: null, simIds: [], search: "", view: "tree", typeFilter: "", srcFilter: "" };
 
 /* ---------- 收藏（本地保存） ---------- */
 let FAV = [];
@@ -42,8 +42,35 @@ function toggleFav(id) {
 }
 
 /* ---------- 工具 ---------- */
+/* 题干模糊匹配：去掉公式命令与符号，空格分隔的多个词须全部命中 */
+function normStem(t) {
+  return String(t || "")
+    .replace(/&(?:lt|gt|amp|nbsp|quot);/g, " ")
+    .replace(/\\([a-zA-Z]+)/g, "$1")
+    .replace(/[{}$^_&\\]/g, " ")
+    .replace(/[()\[\]|<>]/g, " ")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+}
+function fuzzyHit(stem, kw) {
+  const s = normStem(stem);
+  const parts = String(kw || "").trim().split(/[\s,，、]+/).map(normStem).filter(Boolean);
+  return parts.length > 0 && parts.every(x => s.includes(x));
+}
+const CODE2ID = {};
+Object.keys(QCODE).forEach(id => { CODE2ID[QCODE[id]] = id; });
+const SRCS = [...new Set(DB.questions.map(q => q.src))].sort((a, b) => srcRank(b) - srcRank(a));
 const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const $ = sel => document.querySelector(sel);
+/* 教材正文入口：按知识点生成带页码定位的 PDF 链接 */
+function bkLink(kpid, extra) {
+  const b = window.bookPage ? window.bookPage(kpid) : null;
+  if (!b) return "";
+  const B = window.BOOK;
+  return `<a class="bk ${extra || ""}" href="${window.bookHref(kpid)}" target="_blank" rel="noopener" `
+       + `title="${esc(B.title)} P${b.printed}（PDF 第 ${b.physical} 页）">`
+       + `点击查看教材P${b.printed}</a>`;
+}
 function math(el) {
   if (!el) return;
   renderMathInElement(el, {
@@ -77,7 +104,8 @@ function cmpQT(a, b) {
     (a.no - b.no);
 }
 function qsOf(node) {
-  const arr = DB.questions.filter(q => hit(q, node));
+  let arr = DB.questions.filter(q => hit(q, node));
+  if (state.srcFilter) arr = arr.filter(q => q.src === state.srcFilter);
   const f = state.typeFilter;
   return (f ? arr.filter(q => q.type === f) : arr).sort(cmpQT);
 }
@@ -244,12 +272,25 @@ function kpcard(k, showBody) {
     </div>
     <div class="kfoot">
       <button class="btn mini" data-kpexpand="${k.id}">${showBody ? "收起精讲" : "展开精讲"}</button>
+      ${bkLink(k.id)}
     </div>
     <div class="kpbody">${k.html || '<div class="emptynote">本知识点暂无精讲正文</div>'}</div>
   </div>`;
 }
 
 /* ---------- 主视图 ---------- */
+function kpNav(node) {
+  if (node.split(".").length !== 3) return "";
+  const i = DB.kps.findIndex(k => k.id === node);
+  if (i < 0) return "";
+  const prev = DB.kps[i - 1], next = DB.kps[i + 1];
+  if (!prev && !next) return "";
+  return `<div class="kpnav">
+    ${prev ? `<button type="button" class="kpnb" data-node="${prev.id}">← §${prev.id} ${esc(prev.name)}</button>` : "<span></span>"}
+    ${next ? `<button type="button" class="kpnb" data-node="${next.id}">§${next.id} ${esc(next.name)} →</button>` : "<span></span>"}
+  </div>`;
+}
+
 function render() {
   syncTree();
   const main = $("#main");
@@ -291,6 +332,11 @@ function render() {
         ${[["", "全部"], ["choice", "选择"], ["fill", "填空"], ["big", "解答"]].map(([v, t]) =>
           `<button type="button" class="tf ${state.typeFilter === v ? "on" : ""}" data-tf="${v}">${t}</button>`).join("")}
       </div>
+      <select class="srcfilter" data-srcf title="按试卷筛选">
+        <option value="">全部试卷</option>
+        ${SRCS.map(v => `<option value="${esc(v)}" ${state.srcFilter === v ? "selected" : ""}>${esc(v)}</option>`).join("")}
+      </select>
+      <button class="btn" data-anstoggle>${state.showAns ? "隐藏答案" : "显示答案"}</button>
       <button class="btn" data-dl="paper">下载习题册</button>
       <button class="btn" data-dl="inline">下载答案册</button>
     </div>`;
@@ -316,10 +362,53 @@ function render() {
     ? `<div class="qlist">${qs.map((q, i) => qcard(q, i + 1,
         { open: state.showAns, solKp: node.split(".").length === 3 ? node : null })).join("")}</div>`
     : `<div class="emptynote">暂无真题</div>`;
+  html += kpNav(node);
 
   main.innerHTML = html;
   bindMain();
   math(main);
+}
+
+function exportFav() {
+  const day = new Date().toISOString().slice(0, 10);
+  const items = FAV.filter(f => QMAP[f.id]);
+  const data = {
+    app: "工科数学分析·真题数据库", version: "2.4.1", exported: day,
+    codes: items.map(f => QCODE[f.id] || f.id),
+    items: items.map(f => ({ id: f.id, code: QCODE[f.id] || "", t: f.t }))
+  };
+  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = `收藏题目_${day}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function importFav(file) {
+  const r = new FileReader();
+  r.onload = () => {
+    const raw = String(r.result || "").trim();
+    let ids = [];
+    try {
+      const j = JSON.parse(raw);
+      if (Array.isArray(j)) ids = j.map(x => typeof x === "string" ? x : (x && (x.id || x.code)));
+      else if (j && Array.isArray(j.codes)) ids = j.codes;
+      else if (j && Array.isArray(j.items)) ids = j.items.map(x => x && (x.id || x.code));
+    } catch (e) {
+      ids = raw.split(/[\s,，、;；]+/).filter(Boolean);
+    }
+    const now = Date.now();
+    ids.forEach((x, i) => {
+      const key = String(x || "").trim();
+      if (!key) return;
+      const id = QMAP[key] ? key : (CODE2ID[key] || CODE2ID[key.padStart(3, "0")] || null);
+      if (!id || !QMAP[id]) return;
+      const k = FAV.findIndex(f => f.id === id);
+      if (k >= 0) FAV.splice(k, 1);
+      FAV.unshift({ id, t: now - i });
+    });
+    saveFav(); render();
+  };
+  r.readAsText(file, "utf-8");
 }
 
 function renderFav(main) {
@@ -328,15 +417,18 @@ function renderFav(main) {
   const c = countByType(qs);
   let html = `<div class="crumb">收藏</div>
     <h1 class="title">收藏题目</h1>
-    <div class="subline">共 <b>${qs.length}</b> 题　选择 ${c.choice}　填空 ${c.fill}　解答 ${c.big}　·　按收藏时间由新到旧</div>
+    <div class="subline">共 <b>${qs.length}</b> 题　选择 ${c.choice}　填空 ${c.fill}　解答 ${c.big}</div>
     <div class="bar">
       <button class="btn" data-dl="paper">导出习题册</button>
       <button class="btn" data-dl="inline">导出答案册</button>
+      <button class="btn" id="favExport">导出清单</button>
+      <button class="btn" id="favImportBtn">导入清单</button>
+      <input type="file" id="favImportFile" accept=".json,.txt,application/json,text/plain" hidden>
       ${qs.length ? `<button class="btn" id="favClear">清空收藏</button>` : ""}
     </div>`;
   html += qs.length
     ? `<div class="qlist">${qs.map((q, i) => qcard(q, i + 1, { open: state.showAns })).join("")}</div>`
-    : `<div class="emptynote">还没有收藏的题目。点题卡左上角的 ☆ 即可加入。</div>`;
+    : `<div class="emptynote">暂无收藏题目</div>`;
   main.innerHTML = html;
   bindMain();
   math(main);
@@ -344,18 +436,29 @@ function renderFav(main) {
   if (fc) fc.addEventListener("click", () => {
     if (confirm("清空全部收藏？")) { FAV = []; saveFav(); render(); }
   });
+  const ec = $("#favExport"); if (ec) ec.addEventListener("click", exportFav);
+  const ib = $("#favImportBtn"), iff = $("#favImportFile");
+  if (ib && iff) {
+    ib.addEventListener("click", () => iff.click());
+    iff.addEventListener("change", () => {
+      if (iff.files && iff.files[0]) importFav(iff.files[0]);
+      iff.value = "";
+    });
+  }
 }
 
 function renderSearch(main) {
   const kw = state.search.trim();
-  const hit = DB.questions.filter(q => (q.stem + q.sol + q.src).includes(kw));
-  main.innerHTML = `<div class="crumb">搜索</div><h1 class="title">「${esc(kw)}」</h1>
+  const hit = DB.questions.filter(q => fuzzyHit(q.stem, kw)).sort(cmpQT);
+  main.innerHTML = `<div class="crumb">搜索题干</div><h1 class="title">「${esc(kw)}」</h1>
     <div class="subline">命中 <b>${hit.length}</b> 题</div>
     <div class="bar"><button class="btn" id="clearSearch">返回章节视图</button></div>
-    ${hit.length ? `<div class="qlist">${hit.map((q, i) => qcard(q, i + 1)).join("")}</div>`
-      : `<div class="emptynote">没有匹配的题目，换个关键词试试（支持题干、解析、来源）。</div>`}`;
+    ${hit.length ? `<div class="qlist">${hit.map((q, i) => qcard(q, i + 1, { open: state.showAns })).join("")}</div>`
+      : `<div class="emptynote">没有匹配的题目</div>`}`;
   bindMain(); math(main);
-  $("#clearSearch").addEventListener("click", () => { state.search = ""; $("#search").value = ""; render(); });
+  $("#clearSearch").addEventListener("click", () => {
+    state.search = ""; const se = $("#search"); if (se) se.value = ""; render();
+  });
 }
 
 function currentIds() {
@@ -368,6 +471,12 @@ function bindMain() {
   main.querySelectorAll("[data-fav]").forEach(b => b.addEventListener("click", () => toggleFav(b.dataset.fav)));
   main.querySelectorAll("[data-tf]").forEach(b => b.addEventListener("click", () => {
     state.typeFilter = b.dataset.tf;
+    render();
+  }));
+  const sf = main.querySelector("[data-srcf]");
+  if (sf) sf.addEventListener("change", () => { state.srcFilter = sf.value; render(); });
+  main.querySelectorAll("[data-anstoggle]").forEach(b => b.addEventListener("click", () => {
+    state.showAns = !state.showAns;
     render();
   }));
   main.querySelectorAll("[data-sim]").forEach(b => b.addEventListener("click", () => openSim(b.dataset.sim)));
@@ -464,6 +573,7 @@ function openSim(qid, anchor) {
       <div class="seg">${segHTML}</div>
       <div class="kfoot" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn mini" id="simKpToggle">展开所选知识精讲</button>
+        ${bkLink(a)}
       </div>
       <div class="kpbody" id="simKpBody" style="display:none">${akp.html || ""}</div>
     </div>`;
@@ -515,13 +625,11 @@ function closeDrawer() {
 }
 
 /* ---------- 下载 ---------- */
-/* 本地服务（server.py，127.0.0.1:8760）可直接生成 PDF；
-   纯静态托管（如 GitHub Pages）没有后端，退回浏览器打印另存为 PDF。 */
-const LOCAL_SERVER = (location.hostname === "127.0.0.1" || location.hostname === "localhost");
+const HTTP = location.protocol.startsWith("http");
 function download(mode, ids, tag = "") {
   ids = ids.map(i => QMAP[i]).filter(Boolean).sort(cmpQT).map(q => q.id);
   if (!ids.length) { alert("当前没有题目可导出"); return; }
-  if (LOCAL_SERVER) {
+  if (HTTP) {
     const u = `/api/pdf?mode=${mode}&ids=${ids.join(",")}&tag=${encodeURIComponent(tag || titleOf())}`;
     window.location.href = u;
     return;
@@ -586,6 +694,7 @@ function boot() {
 
   const fe = $("#favEntry");
   if (fe) fe.addEventListener("click", () => {
+    state.search = ""; const si = $("#search"); if (si) si.value = "";
     if (state.view === "fav") { render(); return; }
     if (location.hash.slice(1) !== "fav") location.hash = "fav";
     else { state.view = "fav"; render(); }
@@ -605,14 +714,46 @@ function boot() {
 
   $("#dClose").addEventListener("click", closeDrawer);
   $("#mask").addEventListener("click", closeDrawer);
-  document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+  const vb = $("#verBtn"), vp = $("#verPop");
+  if (vb && vp) {
+    vb.addEventListener("click", e => { e.stopPropagation(); vp.hidden = !vp.hidden; });
+    document.addEventListener("click", e => {
+      if (!vp.hidden && !vp.contains(e.target) && e.target !== vb) vp.hidden = true;
+    });
+  }
+
+  document.addEventListener("keydown", e => {
+    const el = e.target, tag = (el && el.tagName || "").toLowerCase();
+    const typing = tag === "input" || tag === "textarea" || tag === "select" || (el && el.isContentEditable);
+    if (e.key === "Escape") {
+      closeDrawer();
+      if (vp) vp.hidden = true;
+      if (typing && el.blur) el.blur();
+      return;
+    }
+    if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "/") { const si = $("#search"); if (si) { e.preventDefault(); si.focus(); } return; }
+    if (e.key === "a" || e.key === "A") { state.showAns = !state.showAns; render(); return; }
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      const i = DB.kps.findIndex(k => k.id === state.node);
+      if (i < 0) return;
+      const t = DB.kps[i + (e.key === "ArrowRight" ? 1 : -1)];
+      if (t) { e.preventDefault(); location.hash = t.id; }
+    }
+  });
+
   const se = $("#search");
   if (se) {
     let t;
     se.addEventListener("input", e => {
       clearTimeout(t);
       const v = e.target.value.trim();
-      t = setTimeout(() => { state.search = v.length >= 2 ? v : ""; render(); }, 220);
+      t = setTimeout(() => {
+        state.search = v;
+        if (v) state.view = "tree";
+        render();
+      }, 200);
     });
   }
   window.addEventListener("hashchange", () => {
