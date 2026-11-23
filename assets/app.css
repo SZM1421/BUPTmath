@@ -2,7 +2,7 @@
   --ink:#1c1a17; --ink2:#4a453c; --ink3:#7a7367;
   --line:#e3ddd1; --line2:#efeae1;
   --bg:#faf8f4; --card:#fff; --tint:#f4efe6;
-  --red:#8a1c1c; --gold:#a8863f; --green:#2d5f4a; --blue:#2f4a6b;
+  --red:#8a1c1c; --gold:#a8863f; --green:#2d5f4a; --blue:#003399; --brand-soft:#eef2fb; --brand-line:#c9d5ef;
   --shadow:0 1px 2px rgba(60,45,25,.05), 0 6px 18px rgba(60,45,25,.05);
 }
 *{box-sizing:border-box}
@@ -24,9 +24,10 @@ a{color:var(--blue); text-decoration:none}
 }
 .brand{display:flex; align-items:center; gap:12px; min-width:0; flex:1}
 .logo{
-  width:38px; height:38px; border-radius:9px; background:var(--red); color:#fff;
-  display:grid; place-items:center; font-size:21px; font-family:"Times New Roman",serif;
+  width:42px; height:42px; flex:0 0 42px; background:none; border:0; border-radius:0;
+  display:grid; place-items:center;
 }
+.logo img{display:block; width:100%; height:100%; object-fit:contain}
 .bt h1{margin:0; font-size:16px; letter-spacing:.4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .bt p{margin:1px 0 0; font-size:11.5px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif}
 .bt p .src{color:#8a6d33; font-weight:600; letter-spacing:.3px}
@@ -41,7 +42,7 @@ a{color:var(--blue); text-decoration:none}
   background:none; border:0; padding:4px 2px; cursor:pointer; letter-spacing:.5px;
   border-bottom:1px dashed transparent; transition:.15s;
 }
-.cbtn:hover,.contact:focus-within .cbtn{color:var(--red); border-bottom-color:#d9c7a6}
+.cbtn:hover,.contact:focus-within .cbtn{color:var(--blue); border-bottom-color:var(--brand-line)}
 .cpop{
   display:none; position:absolute; right:0; top:calc(100% + 8px); z-index:80; width:240px;
   background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px;
@@ -57,14 +58,14 @@ a{color:var(--blue); text-decoration:none}
 .crow + .crow{border-top:1px dashed var(--line2); margin-top:4px; padding-top:7px}
 .ck{flex:0 0 62px; color:var(--ink3); font-size:11px}
 .cpop a{color:var(--blue)}
-.cpop a:hover{color:var(--red); text-decoration:underline}
+.cpop a:hover{color:var(--blue); text-decoration:underline}
 .scope{
   flex:0 0 auto; text-align:right; padding:0 2px 0 22px; margin-left:8px;
   border-left:1px solid var(--line); font-family:"Microsoft YaHei",sans-serif; line-height:1.5;
 }
 .scope .sc-k{font-size:10px; color:var(--ink3); letter-spacing:3px}
 .scope .sc-v{font-size:12.5px; color:var(--ink); font-weight:600; margin-top:1px}
-.scope .sc-e{font-size:12.5px; color:var(--red); font-weight:600; letter-spacing:1px}
+.scope .sc-e{font-size:12.5px; color:var(--blue); font-weight:600; letter-spacing:1px}
 
 .btn{
   display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:7px;
@@ -72,10 +73,10 @@ a{color:var(--blue); text-decoration:none}
   font-family:"Microsoft YaHei",sans-serif; cursor:pointer; transition:.15s; white-space:nowrap;
 }
 .btn:hover{border-color:var(--gold); color:var(--ink)}
-.btn.primary{background:var(--red); border-color:var(--red); color:#fff}
-.btn.primary:hover{background:#731616}
+.btn.primary{background:var(--blue); border-color:var(--blue); color:#fff}
+.btn.primary:hover{background:#002a7a}
 .btn.mini{padding:3px 9px; font-size:11.5px; border-radius:6px}
-.btn.on{background:var(--tint); border-color:var(--gold); color:var(--red)}
+.btn.on{background:var(--tint); border-color:var(--gold); color:var(--blue)}
 
 /* ---------- layout ---------- */
 .layout{display:grid; grid-template-columns:286px 1fr; align-items:start}
@@ -87,15 +88,15 @@ a{color:var(--blue); text-decoration:none}
 .sh-t{font-family:"Microsoft YaHei",sans-serif; font-size:12.5px; font-weight:600; letter-spacing:1px}
 .sh-hint{margin-left:auto; font-family:"Microsoft YaHei",sans-serif; font-size:10px; color:var(--ink3);
   border-bottom:1px dotted var(--line); cursor:help}
-.side-toggle{display:none; font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:var(--ink2);
+.side-toggle{display:none; margin-left:auto; font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:var(--ink2);
   background:#fff; border:1px solid var(--line); border-radius:6px; padding:2px 8px; cursor:pointer}
-.side-toggle:hover{border-color:var(--gold); color:var(--red)}
+.side-toggle:hover{border-color:var(--blue); color:var(--blue)}
 .side-hd span{font-family:"Microsoft YaHei",sans-serif; font-size:11.5px; color:var(--ink3); letter-spacing:2px}
 #search{
-  width:100%; margin-top:8px; padding:6px 10px; border:1px solid var(--line); border-radius:7px;
+  width:100%; margin-top:0; padding:6px 10px; border:1px solid var(--line); border-radius:7px;
   font-size:12.5px; font-family:"Microsoft YaHei",sans-serif; outline:none; background:var(--bg);
 }
-#search:focus{border-color:var(--gold); background:#fff}
+#search:focus{border-color:var(--blue); background:#fff}
 .tree{flex:1; overflow:auto; padding:8px 8px 18px}
 .tree .ch{margin:6px 0 2px}
 .tree .ch-hd, .tree .sec-hd{
@@ -105,11 +106,11 @@ a{color:var(--blue); text-decoration:none}
 .tree .ch-hd{font-size:13px; font-weight:600; color:var(--ink)}
 .tree .sec-hd{font-size:12.5px; color:var(--ink2); padding-left:16px}
 .tree .ch-hd:hover,.tree .sec-hd:hover{background:var(--tint)}
-.tree .ch-hd.active,.tree .sec-hd.active{background:var(--tint); color:var(--red)}
+.tree .ch-hd.active,.tree .sec-hd.active{background:var(--tint); color:var(--blue)}
 .tree .car{font-size:9px; color:var(--ink3); width:10px; transition:.15s}
 .tree .ch.open>.ch-hd .car,.tree li.sec.open>.sec-hd .car{transform:rotate(90deg)}
 .tree .car{display:inline-grid; place-items:center; cursor:pointer; color:var(--ink3)}
-.tree .car:hover{color:var(--red)}
+.tree .car:hover{color:var(--blue)}
 .tree .cnt{margin-left:auto; font-size:10.5px; color:var(--ink3); background:var(--bg);
   border:1px solid var(--line2); border-radius:20px; padding:0 7px}
 .tree ul{list-style:none; margin:0; padding:0; display:none}
@@ -123,19 +124,19 @@ a{color:var(--blue); text-decoration:none}
 .tree .sec-hd>span:nth-child(2){min-width:0; flex:1 1 auto; word-break:break-word}
 .tree .kp .no,.tree .cnt{flex:0 0 auto}
 .tree .kp:hover{background:var(--tint)}
-.tree .kp.active{background:#f7ecec; color:var(--red); font-weight:600}
+.tree .kp.active{background:var(--brand-soft); color:var(--blue); font-weight:600}
 .tree .kp .no{color:var(--ink3); font-size:10.5px; font-variant-numeric:tabular-nums}
-.tree .kp.active .no{color:var(--red)}
+.tree .kp.active .no{color:var(--blue)}
 .side-ft{border-top:1px solid var(--line2); padding:8px 12px; display:flex; flex-direction:column; gap:4px}
 .side-ft a{font-size:11.5px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif}
-.side-ft a:hover{color:var(--red)}
+.side-ft a:hover{color:var(--blue)}
 
 .main{min-height:100vh; padding:26px 34px 80px; max-width:1000px}
 
 /* ---------- page head ---------- */
 .crumb{font-size:11.5px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif; letter-spacing:.5px}
 h1.title{font-size:25px; margin:6px 0 4px; letter-spacing:1px; font-weight:700}
-h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nums}
+h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-nums}
 .subline{color:var(--ink3); font-size:12.5px; font-family:"Microsoft YaHei",sans-serif}
 .bar{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 6px; align-items:center}
 .bar .sep{flex:1}
@@ -144,7 +145,7 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 .kpwrap{margin:22px 0 8px}
 .sechd{
   display:flex; align-items:baseline; gap:10px; margin:26px 0 12px;
-  border-bottom:1.5px solid var(--red); padding-bottom:6px;
+  border-bottom:1.5px solid var(--blue); padding-bottom:6px;
 }
 .sechd h2{margin:0; font-size:15px; letter-spacing:2px; font-family:"Microsoft YaHei",sans-serif}
 .sechd .n{font-size:12px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif}
@@ -158,7 +159,7 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 .kpcard .kh{display:flex; align-items:center; gap:8px}
 .kpcard .kno{font-size:11px; color:var(--gold); font-family:"Microsoft YaHei",sans-serif; letter-spacing:.5px}
 .kpcard .kname{font-size:14px; font-weight:600; color:inherit; text-decoration:none; cursor:pointer}
-.kpcard .kname:hover{color:var(--red); text-decoration:underline}
+.kpcard .kname:hover{color:var(--blue); text-decoration:underline}
 .kpcard .knum{margin-left:auto; font-size:11px; color:var(--ink3); font-family:"Microsoft YaHei",sans-serif}
 .kpcard .ksum{margin-top:7px; font-size:12.5px; color:var(--ink2); line-height:1.65}
 .kpcard .kfoot{margin-top:9px; display:flex; gap:8px; align-items:center}
@@ -174,7 +175,7 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 .kpbody .blk.cor{border-color:var(--green)} .kpbody .blk.cor .lbl{background:var(--green)}
 .kpbody .blk.note{border-color:var(--gold); background:#fdfaf2}
 .kpbody .blk.note .lbl{background:var(--gold)}
-.kpbody h4.small{font-size:13px; margin:12px 0 6px; color:var(--red); font-family:"Microsoft YaHei",sans-serif}
+.kpbody h4.small{font-size:13px; margin:12px 0 6px; color:var(--blue); font-family:"Microsoft YaHei",sans-serif}
 .kpbody table.t{border-collapse:collapse; width:100%; margin:8px 0; font-size:12.5px}
 .kpbody table.t th,.kpbody table.t td{border:1px solid var(--line); padding:5px 8px; text-align:left}
 .kpbody table.t th{background:var(--tint); font-family:"Microsoft YaHei",sans-serif; font-size:11.5px}
@@ -183,7 +184,7 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 .kpbody .ex .lv{background:var(--tint); border-radius:4px; padding:0 6px; margin-left:6px; font-size:10.5px}
 .kpbody .ex .a{margin-top:5px; font-size:12.8px}
 .kpbody .ex .tk{margin-top:5px; font-size:12px; color:var(--ink3)}
-.kpbody .k{font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:var(--red)}
+.kpbody .k{font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:var(--blue)}
 
 /* ---------- question cards ---------- */
 .qlist{margin-top:8px}
@@ -194,7 +195,7 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 .qcard:hover{border-color:#d9cfba}
 .qhd{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px}
 .qno{
-  min-width:24px; height:24px; padding:0 7px; border-radius:6px; background:var(--tint); color:var(--red);
+  min-width:24px; height:24px; padding:0 7px; border-radius:6px; background:var(--tint); color:var(--blue);
   font-family:"Microsoft YaHei",sans-serif; font-size:11.5px; font-weight:600; display:inline-grid; place-items:center;
 }
 .qtype{font-family:"Microsoft YaHei",sans-serif; font-size:10.5px; color:#fff; background:var(--ink3);
@@ -224,11 +225,11 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
   margin-top:10px; border-top:1px dashed var(--line); padding-top:9px; display:none;
 }
 .qcard.open .ansbox{display:block}
-.ansbtn.on{background:#fbf1f1; border-color:#e3c9c9; color:var(--red)}
+.ansbtn.on{background:var(--brand-soft); border-color:var(--brand-line); color:var(--blue)}
 .ansline{font-size:13.5px}
-.ansline .k{font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:#fff; background:var(--red);
+.ansline .k{font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:#fff; background:var(--blue);
   border-radius:4px; padding:1px 7px; margin-right:7px}
-.ansline b{color:var(--red)}
+.ansline b{color:var(--blue)}
 .sol{margin-top:7px; font-size:13.5px; color:#2c2823; line-height:1.85}
 .sol .k{font-family:"Microsoft YaHei",sans-serif; font-size:11px; color:var(--gold); margin-right:6px}
 .sol.alt{margin-top:8px; padding-top:7px; border-top:1px dashed var(--line2)}
@@ -266,7 +267,7 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
   border:1px solid var(--line); background:#fff; color:var(--ink2); cursor:pointer; transition:.15s;
 }
 .segbtn:hover{border-color:var(--gold)}
-.segbtn.on{background:var(--red); border-color:var(--red); color:#fff}
+.segbtn.on{background:var(--blue); border-color:var(--blue); color:#fff}
 .segbtn.m{color:#2f4a6b;border-style:dashed}
 .segbtn.m.on{background:var(--blue); border-color:var(--blue); color:#fff}
 .segbtn .k{font-size:10px; opacity:.75; margin-right:4px}
@@ -290,14 +291,14 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 
 /* ---------- 收藏 ---------- */
 .star{background:none; border:0; cursor:pointer; font-size:15px; line-height:1; color:#c9bfa8; padding:0 2px; transition:.15s}
-.star:hover{color:var(--gold); transform:scale(1.12)}
-.star.on{color:#d4a017}
+.star:hover{color:var(--blue); transform:scale(1.12)}
+.star.on{color:var(--blue)}
 .fav-entry{
   display:flex; align-items:center; gap:6px; margin:8px 12px 2px; padding:6px 10px;
   border:1px solid var(--line); background:#fff; border-radius:7px;
   font-family:"Microsoft YaHei",sans-serif; font-size:12px; color:var(--ink2); cursor:pointer;
 }
-.fav-entry:hover{border-color:var(--gold); color:var(--red)}
+.fav-entry:hover{border-color:var(--blue); color:var(--blue)}
 .fav-entry #favCount{
   margin-left:auto; font-size:10.5px; color:var(--ink3); background:var(--bg);
   border:1px solid var(--line2); border-radius:20px; padding:0 7px;
@@ -309,19 +310,58 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
 .tf{font-family:"Microsoft YaHei",sans-serif; font-size:12px; padding:5px 11px; border:0; background:#fff; color:var(--ink2); cursor:pointer}
 .tf + .tf{border-left:1px solid var(--line2)}
 .tf:hover{background:var(--tint)}
-.tf.on{background:var(--red); color:#fff}
+.tf.on{background:var(--blue); color:#fff}
 
 /* ---------- 抽屉原题 ---------- */
 .orig{background:var(--tint); border:1px solid var(--line2); border-radius:8px; padding:8px 10px; margin-bottom:8px}
 .olab{font-family:"Microsoft YaHei",sans-serif; font-size:10.5px; color:var(--ink3)}
 .ostem{display:block; margin-top:2px; font-size:13px; color:var(--ink); line-height:1.8}
 .sol .k.kl{background:none; border:0; padding:0; cursor:pointer; text-decoration:underline dotted}
-.sol .k.kl:hover{color:var(--red)}
+.sol .k.kl:hover{color:var(--blue)}
 
 /* ---------- 打印 ---------- */
+/* ---------- 教材正文跳转 ---------- */
+.kpcard .kfoot{justify-content:space-between}
+.bk{
+  display:inline-flex; align-items:center; justify-content:center; white-space:nowrap;
+  font-family:"Microsoft YaHei",sans-serif; font-size:11.5px; font-weight:500;
+  color:var(--blue); text-decoration:none; background:#fff;
+  border:1px solid var(--blue); border-radius:6px;
+  padding:4px 10px; line-height:1.4; cursor:pointer; transition:background .15s,color .15s;
+}
+.bk:hover{background:var(--blue); color:#fff}
+.bk.large{font-size:12.5px; font-weight:600; padding:5px 13px}
+
+/* ---------- 搜索框、试卷筛选、上下节导航、更新记录 ---------- */
+.search-wrap{padding:8px 12px 0}
+.srcfilter{
+  font-family:"Microsoft YaHei",sans-serif; font-size:12px; padding:6px 9px;
+  border:1px solid var(--line); border-radius:7px; background:#fff; color:var(--ink2);
+  cursor:pointer; outline:none; max-width:190px; margin-right:4px;
+}
+.srcfilter:focus{border-color:var(--blue)}
+.kpnav{display:flex; justify-content:space-between; gap:12px; margin:26px 0 6px; padding-top:14px; border-top:1px solid var(--line2)}
+.kpnb{
+  flex:1 1 0; min-width:0; text-align:left; font-family:"Microsoft YaHei",sans-serif; font-size:12px;
+  color:var(--ink2); background:#fff; border:1px solid var(--line); border-radius:7px;
+  padding:8px 11px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.kpnb:last-child{text-align:right}
+.kpnb:hover{border-color:var(--blue); color:var(--blue)}
+.ver{cursor:pointer}
+.verpop{
+  position:absolute; top:56px; left:22px; z-index:40; width:360px; max-width:calc(100vw - 44px);
+  background:#fff; border:1px solid var(--line); border-radius:9px; box-shadow:var(--shadow); padding:12px 15px;
+}
+.verpop[hidden]{display:none}
+.vph{font-family:"Microsoft YaHei",sans-serif; font-size:12.5px; font-weight:600; color:var(--blue); margin-bottom:6px}
+.verpop ul{margin:0; padding-left:18px}
+.verpop li{font-family:"Microsoft YaHei",sans-serif; font-size:11.5px; color:var(--ink2); line-height:1.9}
+
 @media print{
   @page{size:A4; margin:16mm 14mm}
-  .topbar,.side,.drawer,.mask,.bar,.qact,.crumb,.kfoot,.star,.fav-entry{display:none!important}
+  .topbar,.side,.drawer,.mask,.bar,.qact,.crumb,.kfoot,.star,.fav-entry,.bk,.kpnav,.verpop,
+  .gb-entry,.gb-panel,.gb-mask{display:none!important}
   .layout{display:block}
   .main{max-width:none; padding:0}
   body{background:#fff; font-size:11pt}
@@ -331,4 +371,36 @@ h1.title .no{color:var(--red); margin-right:8px; font-variant-numeric:tabular-nu
   .kpcard.open .kpbody{display:block}
   .sechd{margin-top:6mm}
   a{color:#000; text-decoration:none}
+}
+
+/* ---------- 留言板（Valine） ---------- */
+.gb-entry{
+  flex:0 0 auto; margin-left:8px; font-family:"Microsoft YaHei",sans-serif;
+  font-size:11.5px; color:var(--ink3); background:none; border:0; padding:4px 2px;
+  cursor:pointer; letter-spacing:.5px; white-space:nowrap;
+  border-bottom:1px dashed transparent; transition:.15s;
+}
+.gb-entry:hover{color:var(--blue); border-bottom-color:var(--brand-line)}
+.gb-mask{position:fixed; inset:0; background:rgba(20,24,38,.45); opacity:0; pointer-events:none; transition:.2s; z-index:60}
+.gb-mask.on{opacity:1; pointer-events:auto}
+.gb-panel{
+  position:fixed; z-index:61; left:50%; top:50%; transform:translate(-50%,-46%);
+  width:min(680px,92vw); max-height:86vh; display:flex; flex-direction:column;
+  background:#fff; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.28);
+  opacity:0; pointer-events:none; transition:.22s;
+}
+.gb-panel.open{opacity:1; pointer-events:auto; transform:translate(-50%,-50%)}
+.gb-hd{display:flex; align-items:center; justify-content:space-between; padding:13px 18px;
+  border-bottom:1px solid var(--line2); flex:0 0 auto}
+.gb-title{font-family:"Microsoft YaHei",sans-serif; font-size:15px; font-weight:600; color:var(--ink)}
+.gb-close{background:none; border:0; font-size:22px; line-height:1; color:var(--ink3); cursor:pointer; padding:0 4px}
+.gb-close:hover{color:var(--red)}
+.gb-bd{padding:12px 18px 22px; overflow:auto; -webkit-overflow-scrolling:touch}
+.gb-status{font-family:"Microsoft YaHei",sans-serif; font-size:12px; color:var(--ink3); text-align:center; padding:6px 0}
+.gb-status:empty{display:none}
+@media (max-width:720px){
+  .gb-entry{margin-left:2px; font-size:11px}
+  .gb-panel{width:100vw; max-width:100vw; height:100vh; max-height:100vh; border-radius:0;
+    top:0; left:0; transform:translate(0,10px)}
+  .gb-panel.open{transform:translate(0,0)}
 }
