@@ -625,11 +625,13 @@ function closeDrawer() {
 }
 
 /* ---------- 下载 ---------- */
-const HTTP = location.protocol.startsWith("http");
+/* 本地服务（server.py，127.0.0.1:8760）可直接生成 PDF；
+   纯静态托管（如 GitHub Pages）没有后端，退回浏览器打印另存为 PDF。 */
+const LOCAL_SERVER = location.hostname === "127.0.0.1" || location.hostname === "localhost";
 function download(mode, ids, tag = "") {
   ids = ids.map(i => QMAP[i]).filter(Boolean).sort(cmpQT).map(q => q.id);
   if (!ids.length) { alert("当前没有题目可导出"); return; }
-  if (HTTP) {
+  if (LOCAL_SERVER) {
     const u = `/api/pdf?mode=${mode}&ids=${ids.join(",")}&tag=${encodeURIComponent(tag || titleOf())}`;
     window.location.href = u;
     return;
