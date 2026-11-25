@@ -15,7 +15,7 @@ const QCODE = {};
   .sort((a, b) => (TYPE_ORDER[a.type] - TYPE_ORDER[b.type]) || (a.no - b.no))
   .forEach((q, i) => { QCODE[q.id] = String(i + 1).padStart(3, "0"); });
 
-let state = { node: "ch1", showAns: false, simOf: null, simAnchor: null, simIds: [], search: "", view: "tree", typeFilter: "", srcFilter: "" };
+let state = { node: "ch1", showAns: false, simOf: null, simSel: new Set(), simIds: [], pick: new Set(), pickNode: null, search: "", view: "tree", typeFilter: "", srcFilter: "" };
 
 /* ---------- 收藏（本地保存） ---------- */
 let FAV = [];
@@ -243,6 +243,7 @@ function qcard(q, idx, opts = {}) {
   const open = !!opts.open;
   return `<article class="qcard ${open ? "open" : ""}" id="q-${q.id}">
     <div class="qhd">
+      <label class="qpick" title="勾选后可打印"><input type="checkbox" data-pick="${q.id}"${state.pick.has(q.id) ? " checked" : ""}></label>
       <span class="qno" title="编号">${QCODE[q.id] || idx}</span>
       <button type="button" class="star ${isFav(q.id) ? "on" : ""}" data-fav="${q.id}"
         title="${isFav(q.id) ? "取消收藏" : "添加收藏"}" aria-pressed="${isFav(q.id)}">${isFav(q.id) ? "★" : "☆"}</button>
@@ -292,6 +293,7 @@ function kpNav(node) {
 }
 
 function render() {
+  if (state.node !== state.pickNode) { state.pick.clear(); state.pickNode = state.node; }
   syncTree();
   const main = $("#main");
   if (state.view === "fav") return renderFav(main);
@@ -337,8 +339,13 @@ function render() {
         ${SRCS.map(v => `<option value="${esc(v)}" ${state.srcFilter === v ? "selected" : ""}>${esc(v)}</option>`).join("")}
       </select>
       <button class="btn" data-anstoggle>${state.showAns ? "隐藏答案" : "显示答案"}</button>
-      <button class="btn" data-dl="paper">下载习题册</button>
-      <button class="btn" data-dl="inline">下载答案册</button>
+      <div class="pbar" data-scope="main">
+        <span class="pn">已选 <b data-pcount>0</b> 道</span>
+        <button class="btn mini" data-pall>全选</button>
+        <button class="btn mini" data-pmode="paper">打印习题册</button>
+        <button class="btn mini" data-pmode="ans">打印答案册</button>
+        <button class="btn mini" data-pmode="both">全部打印</button>
+      </div>
     </div>`;
 
   // 知识点汇总
@@ -419,11 +426,13 @@ function renderFav(main) {
     <h1 class="title">收藏题目</h1>
     <div class="subline">共 <b>${qs.length}</b> 题　选择 ${c.choice}　填空 ${c.fill}　解答 ${c.big}</div>
     <div class="bar">
-      <button class="btn" data-dl="paper">导出习题册</button>
-      <button class="btn" data-dl="inline">导出答案册</button>
-      <button class="btn" id="favExport">导出清单</button>
-      <button class="btn" id="favImportBtn">导入清单</button>
-      <input type="file" id="favImportFile" accept=".json,.txt,application/json,text/plain" hidden>
+      <div class="pbar" data-scope="main">
+        <span class="pn">已选 <b data-pcount>0</b> 道</span>
+        <button class="btn mini" data-pall>全选</button>
+        <button class="btn mini" data-pmode="paper">打印习题册</button>
+        <button class="btn mini" data-pmode="ans">打印答案册</button>
+        <button class="btn mini" data-pmode="both">全部打印</button>
+      </div>
       ${qs.length ? `<button class="btn" id="favClear">清空收藏</button>` : ""}
     </div>`;
   html += qs.length
@@ -436,15 +445,6 @@ function renderFav(main) {
   if (fc) fc.addEventListener("click", () => {
     if (confirm("清空全部收藏？")) { FAV = []; saveFav(); render(); }
   });
-  const ec = $("#favExport"); if (ec) ec.addEventListener("click", exportFav);
-  const ib = $("#favImportBtn"), iff = $("#favImportFile");
-  if (ib && iff) {
-    ib.addEventListener("click", () => iff.click());
-    iff.addEventListener("change", () => {
-      if (iff.files && iff.files[0]) importFav(iff.files[0]);
-      iff.value = "";
-    });
-  }
 }
 
 function renderSearch(main) {
@@ -468,6 +468,7 @@ function currentIds() {
 
 function bindMain() {
   const main = $("#main");
+  updatePicks();
   main.querySelectorAll("[data-fav]").forEach(b => b.addEventListener("click", () => toggleFav(b.dataset.fav)));
   main.querySelectorAll("[data-tf]").forEach(b => b.addEventListener("click", () => {
     state.typeFilter = b.dataset.tf;
@@ -527,73 +528,79 @@ function jac(a, b) {
   const uni = new Set([...A, ...B]).size;
   return uni ? inter / uni : 0;
 }
-function simBy(qid, anchor) {
+function simByMulti(qid, kps) {
   const q = QMAP[qid];
-  const sec = anchor.split(".").slice(0, 2).join(".");
+  if (!kps.length) return [];
   return DB.questions
-    .filter(x => x.id !== qid && x.kps.includes(anchor))
+    .filter(x => x.id !== qid && kps.every(k => (x.kps || []).includes(k)))
     .map(x => {
-      const sameP = x.primary === anchor ? 1 : 0;
-      const sameS = x.primary.split(".").slice(0, 2).join(".") === sec ? 1 : 0;
-      const sc = 2.6 * sameP + 2.4 * jac(x.kps, q.kps) + 0.8 * sameS
-        + 1.6 * cosSim(SIG[x.id], SIG[qid]) + (x.type === q.type ? 0.3 : 0);
+      const sc = 2.4 * jac(x.kps, q.kps) + 1.6 * cosSim(SIG[x.id], SIG[qid])
+        + (x.type === q.type ? 0.3 : 0);
       return { x, sc };
     })
     .sort((a, b) => b.sc - a.sc)
-    .slice(0, 12)
     .map(o => o.x);
 }
 
 function openSim(qid, anchor) {
   const q = QMAP[qid];
-  const valid = [q.primary, ...q.cross, ...q.methods];
-  const a = (anchor && valid.includes(anchor)) ? anchor : q.primary;
+  const valid = [q.primary, ...q.cross, ...q.methods].filter((v, i, a) => a.indexOf(v) === i);
+  const init = (anchor || "").split(",").map(s => s.trim()).filter(k => valid.includes(k));
+  state.pick.clear();
   state.simOf = qid;
-  state.simAnchor = a;
-  const akp = KPMAP[a] || { name: "", sum: "", sec: "" };
-  const sims = simBy(qid, a);
-  state.simIds = sims.map(x => x.id);
-
-  $("#dTitle").textContent = "相似题";
-  $("#dSub").textContent = `原题：${TYPE_NAME[q.type]}（${q.src}）　·　共 ${sims.length} 道`;
-
-  // 知识点与解法并列列出（不区分主/兼），方法保留「法」标
-  const kpAnchors = [q.primary, ...q.cross].filter((v, i, arr) => arr.indexOf(v) === i);
-  const mAnchors = q.methods.filter(k => !kpAnchors.includes(k));
-  const nameOf = k => (KPMAP[k] || {}).name || "";
-  const segHTML =
-    kpAnchors.map(k => `<button class="segbtn ${k === a ? "on" : ""}" data-anchor="${k}"
-      title="${esc(nameOf(k))}">${k} ${esc(nameOf(k))}</button>`).join("") +
-    mAnchors.map(k => `<button class="segbtn m ${k === a ? "on" : ""}" data-anchor="${k}"
-      title="${esc(nameOf(k))}">法 ${esc(nameOf(k))}</button>`).join("");
-
-  const head = `<div class="simhead">
-      <div class="orig"><span class="olab">原题</span><div class="ostem">${esc(q.stem)}</div></div>
-      <div class="txt"><b>§${a} ${esc(akp.name)}</b></div>
-      <div class="seg">${segHTML}</div>
-      <div class="kfoot" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <button class="btn mini" id="simKpToggle">展开所选知识精讲</button>
-        ${bkLink(a)}
-      </div>
-      <div class="kpbody" id="simKpBody" style="display:none">${akp.html || ""}</div>
-    </div>`;
-
-  const bar = `<div class="bar" style="margin:0 0 12px">
-      <button class="btn" data-dl2="paper">下载习题册</button>
-      <button class="btn" data-dl2="inline">下载答案册</button>
-    </div>`;
-
-  const body = head + bar + (sims.length
-    ? `<div class="simlist">${sims.map((x, i) => qcard(x, i + 1, { solKp: a, open: state.showAns, noSim: true })).join("")}</div>`
-    : `<div class="emptynote">暂无其它真题。</div>`);
-
-  $("#dBody").innerHTML = body;
+  state.simSel = new Set(init.length ? init : [q.primary]);
   $("#drawer").classList.add("open");
   $("#mask").classList.add("on");
+  renderSim();
+}
+
+function renderSim() {
+  const qid = state.simOf;
+  const q = QMAP[qid];
+  if (!q) return;
+  const sel = [...state.simSel];
+  const sims = simByMulti(qid, sel);
+  state.simIds = sims.map(x => x.id);
+
+  const nameOf = k => (KPMAP[k] || {}).name || "";
+  const kpAnchors = [q.primary, ...q.cross].filter((v, i, a) => a.indexOf(v) === i);
+  const mAnchors = q.methods.filter(k => !kpAnchors.includes(k));
+  const chip = (k, cls) => `<button class="segbtn ${cls} ${state.simSel.has(k) ? "on" : ""}"
+      data-anchor="${k}" title="${esc(nameOf(k))}">${cls === "m" ? "法 " : ""}${k} ${esc(nameOf(k))}</button>`;
+  const segHTML = kpAnchors.map(k => chip(k, "")).join("") + mAnchors.map(k => chip(k, "m")).join("");
+
+  $("#dTitle").textContent = "相似题";
+  $("#dSub").textContent = `原题：${TYPE_NAME[q.type]}（${q.src}）　·　已选 ${sel.length} 个标签　·　共 ${sims.length} 道`;
+
+  const first = sel[0];
+  const head = `<div class="simhead">
+      <div class="orig"><span class="olab">原题</span><div class="ostem">${esc(q.stem)}</div></div>
+      <div class="txt"><b>已选标签：</b>${sel.length ? sel.map(k => "§" + k + " " + esc(nameOf(k))).join(" ＋ ") : "（未选）"}</div>
+      <div class="seg">${segHTML}</div>
+    </div>`;
+
+  const pbar = `<div class="pbar" data-scope="sim">
+        <span class="pn">已选 <b data-pcount>0</b> 道</span>
+        <button class="btn mini" data-pall>全选</button>
+        <button class="btn mini" data-pmode="paper">打印习题册</button>
+        <button class="btn mini" data-pmode="ans">打印答案册</button>
+        <button class="btn mini" data-pmode="both">全部打印</button>
+      </div>`;
+
+  const body = pbar + head + (sims.length
+    ? `<div class="simlist">${sims.map((x, i) => qcard(x, i + 1, { solKp: null, open: state.showAns, noSim: true })).join("")}</div>`
+    : `<div class="emptynote">${sel.length ? "没有同时含有这些标签的其它真题。" : "请选择至少一个标签。"}</div>`);
+
+  $("#dBody").innerHTML = body;
+  updatePicks();
   math($("#dBody"));
 
   $("#dBody").querySelectorAll("[data-anchor]").forEach(b =>
-    b.addEventListener("click", () => openSim(qid, b.dataset.anchor)));
+    b.addEventListener("click", () => {
+      const k = b.dataset.anchor;
+      if (state.simSel.has(k)) state.simSel.delete(k); else state.simSel.add(k);
+      renderSim();
+    }));
   $("#dBody").querySelectorAll("[data-sim]").forEach(b =>
     b.addEventListener("click", () => openSim(b.dataset.sim)));
   $("#dBody").querySelectorAll("[data-goto]").forEach(b =>
@@ -609,14 +616,10 @@ function openSim(qid, anchor) {
     closeDrawer(); location.hash = b.dataset.kp;
   }));
   $("#dBody").querySelectorAll("[data-dl2]").forEach(b => b.addEventListener("click",
-    () => download(b.dataset.dl2, state.simIds, `${a} 相似题`)));
-  $("#simKpToggle").addEventListener("click", e => {
-    const el = $("#simKpBody");
-    el.style.display = el.style.display === "none" ? "block" : "none";
-    e.target.textContent = el.style.display === "none" ? "展开所选知识精讲" : "收起精讲";
-    math(el);
-  });
+    () => download(b.dataset.dl2, state.simIds, `${first ? "§" + first + " " + ((KPMAP[first] || {}).name || "") : "原题"} 相似题`)));
+
 }
+
 function closeDrawer() {
   $("#drawer").classList.remove("open");
   $("#mask").classList.remove("on");
@@ -644,21 +647,37 @@ function titleOf() {
   if (n.split(".").length === 2) return SECMAP[n].no + " " + SECMAP[n].name;
   return KPMAP[n].id + " " + KPMAP[n].name;
 }
+function updatePicks() {
+  document.querySelectorAll("[data-pick]").forEach(x => { x.checked = state.pick.has(x.dataset.pick); });
+  document.querySelectorAll("[data-pcount]").forEach(x => { x.textContent = String(state.pick.size); });
+  document.querySelectorAll(".pbar").forEach(bar => {
+    const scope = bar.dataset.scope === "sim" ? $("#dBody") : $("#main");
+    if (!scope) return;
+    const boxes = [...scope.querySelectorAll("[data-pick]")];
+    const all = boxes.length && boxes.every(x => x.checked);
+    const btn = bar.querySelector("[data-pall]");
+    if (btn) btn.textContent = all ? "取消全选" : "全选";
+  });
+}
+
 function printFallback(mode, ids, tag) {
   const w = window.open("", "_blank");
   const qs = ids.map(i => QMAP[i]).filter(Boolean);
-  const title = { paper: "习题册", ans: "答案册", inline: "答案册" }[mode];
-  const body = qs.map((q, i) => {
-    const opt = (q.opts || []).length ? `<div class="o">${q.opts.map((x, j) => `${"ABCD"[j]}．${esc(x)}`).join("　　")}</div>` : "";
-    const meta = `<div class="m">〔${esc(q.src)}〕　编号 ${QCODE[q.id] || ""}</div>`;
-    if (mode === "paper") return `<div class="q">${meta}<div class="s"><b>${i + 1}.</b> ${esc(q.stem)}</div>${opt}<div class="sp"></div></div>`;
+  const opt = q => (q.opts || []).length ? `<div class="o">${q.opts.map((x, j) => `${"ABCD"[j]}．${esc(x)}`).join("　　")}</div>` : "";
+  const meta = q => `<div class="m">〔${esc(q.src)}〕　编号 ${QCODE[q.id] || ""}</div>`;
+  const paperHTML = qs.map((q, i) => `<div class="q">${meta(q)}<div class="s"><b>${i + 1}.</b> ${esc(q.stem)}</div>${opt(q)}<div class="sp"></div></div>`).join("");
+  const ansHTML = qs.map((q, i) => {
     const alts = Object.entries(q.alts || {}).filter(([, v]) => v && v !== q.sol)
       .map(([k, v]) => `<div class="a">另解·${esc((KPMAP[k] || {}).name || k)}　${esc(v)}</div>`).join("");
     const ansBlock = `<div class="a">答案　<b>${esc(q.ans)}</b></div><div class="a">解析　${esc(q.sol)}</div>${alts}`;
-    if (mode === "ans") return `<div class="q">${meta}<div class="s"><b>${i + 1}.</b> ${esc(q.stem)}</div>${ansBlock}</div>`;
-    return `<div class="q">${meta}<div class="s"><b>${i + 1}.</b> ${esc(q.stem)}</div>${opt}${ansBlock}</div>`;
+    return `<div class="q">${meta(q)}<div class="s"><b>${i + 1}.</b> ${esc(q.stem)}</div>${ansBlock}</div>`;
   }).join("");
-  w.document.write(`<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${tag}·${title}</title>
+  const headOf = name => `<h1>${tag}　${name}</h1><div class="meta">工科数学分析（上）· 期中范围 · 共 ${qs.length} 题 · 来自《大邮数学集》</div>`;
+  let body;
+  if (mode === "paper") body = headOf("习题册") + paperHTML;
+  else if (mode === "ans" || mode === "inline") body = headOf("答案册") + ansHTML;
+  else body = headOf("习题册") + paperHTML + `<div class="anssec">${headOf("答案册")}${ansHTML}</div>`;
+  w.document.write(`<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><title>${tag}</title>
   <link rel="stylesheet" href="${location.href.replace(/[^/]*$/, "")}assets/katex/katex.min.css">
   <script src="${location.href.replace(/[^/]*$/, "")}assets/katex/katex.min.js"><\/script>
   <script src="${location.href.replace(/[^/]*$/, "")}assets/katex/contrib/auto-render.min.js"><\/script>
@@ -672,8 +691,8 @@ function printFallback(mode, ids, tag) {
   .m{font-size:9pt;color:#6e6047;margin-bottom:1mm;font-family:"Microsoft YaHei",sans-serif}
   .o{margin:1mm 0 0 5mm;font-size:10.5pt}
   .sp{height:14mm;border-bottom:.5pt dotted #bbb}
+  .anssec{break-before:page}
   </style></head><body>
-  <h1>${tag}　${title}</h1><div class="meta">工科数学分析（上）· 期中范围 · 共 ${qs.length} 题 · 来自《大邮数学集》</div>
   ${body}
   <script>renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false});
   setTimeout(()=>window.print(),400);<\/script></body></html>`);
@@ -713,6 +732,32 @@ function boot() {
       st.blur();
     });
   }
+
+  document.addEventListener("change", e => {
+    const el = e.target;
+    if (el && el.matches && el.matches("[data-pick]")) {
+      if (el.checked) state.pick.add(el.dataset.pick); else state.pick.delete(el.dataset.pick);
+      updatePicks();
+    }
+  });
+  document.addEventListener("click", e => {
+    const bar = e.target.closest ? e.target.closest(".pbar") : null;
+    if (!bar) return;
+    const scope = bar.dataset.scope === "sim" ? $("#dBody") : $("#main");
+    if (e.target.closest("[data-pall]")) {
+      const boxes = [...scope.querySelectorAll("[data-pick]")];
+      const all = boxes.length && boxes.every(x => x.checked);
+      boxes.forEach(x => { if (all) state.pick.delete(x.dataset.pick); else state.pick.add(x.dataset.pick); });
+      updatePicks(); return;
+    }
+    const pb = e.target.closest("[data-pmode]");
+    if (pb) {
+      const ids = [...state.pick];
+      if (!ids.length) { alert("请先在题目左上角勾选要打印的题"); return; }
+      const tag = bar.dataset.scope === "sim" ? "相似题" : (state.view === "fav" ? "收藏题目" : titleOf());
+      printFallback(pb.dataset.pmode, ids, tag);
+    }
+  });
 
   $("#dClose").addEventListener("click", closeDrawer);
   $("#mask").addEventListener("click", closeDrawer);

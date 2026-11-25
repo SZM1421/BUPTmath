@@ -404,3 +404,38 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
     top:0; left:0; transform:translate(0,10px)}
   .gb-panel.open{transform:translate(0,0)}
 }
+
+
+/* 打印选择弹窗 */
+.pdmask{position:fixed;inset:0;background:rgba(8,16,28,.55);display:flex;align-items:center;justify-content:center;z-index:9000}
+.pd{background:#fff;border-radius:14px;width:min(560px,92vw);max-height:82vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.pdhd{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #e6e9ee;font-family:"Microsoft YaHei",sans-serif}
+.pdhd b{font-size:14px;color:#1f3a5f}
+.pdhd .n{font-size:11px;color:#8a93a3}
+.pdhd .sp{flex:1;height:0;border:0}
+.pdlist{overflow:auto;padding:6px 10px;flex:1}
+.pdrow{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:12px;color:#2b3a4f}
+.pdrow:hover{background:#f4f7fb}
+.pdrow input{accent-color:#1f3a5f;width:15px;height:15px}
+.pdc{font-weight:700;color:#1f3a5f;min-width:34px}
+.pds{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pdfoot{display:flex;gap:10px;padding:12px 16px;border-top:1px solid #e6e9ee;flex-wrap:wrap;justify-content:flex-end}
+
+
+/* 题目勾选与打印条 */
+.qpick{display:flex;align-items:center;margin-right:2px;cursor:pointer}
+.qpick input{width:15px;height:15px;accent-color:#1f3a5f;cursor:pointer}
+.pbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;margin-top:10px;
+  padding:8px 10px;border:1px solid #e3e8ef;border-radius:10px;background:#f7f9fc}
+.pbar .pn{font-size:12px;color:#4a5a72;font-family:"Microsoft YaHei",sans-serif}
+.pbar .pn b{color:#1f3a5f}
+.pbar .btn.mini{padding:4px 10px}
+
+
+/* 打印条：主视图固定在底部，相似题吸顶 */
+#main{padding-bottom:84px}
+.pbar[data-scope="main"]{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;
+  border-radius:0;border-left:0;border-right:0;border-bottom:0;
+  box-shadow:0 -6px 18px rgba(0,0,0,.08);background:#fff;padding:10px 16px}
+.pbar[data-scope="sim"]{position:sticky;top:0;z-index:8;margin:0 0 12px;background:#fff;
+  box-shadow:0 4px 12px rgba(0,0,0,.06)}
