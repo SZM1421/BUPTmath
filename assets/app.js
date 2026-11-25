@@ -574,10 +574,11 @@ function renderSim() {
 
   const first = sel[0];
   const head = `<div class="simhead">
-      <div class="orig"><span class="olab">原题</span><div class="ostem">${esc(q.stem)}</div></div>
       <div class="txt"><b>已选标签：</b>${sel.length ? sel.map(k => "§" + k + " " + esc(nameOf(k))).join(" ＋ ") : "（未选）"}</div>
       <div class="seg">${segHTML}</div>
     </div>`;
+
+  const origCard = `<div class="simorig"><div class="simlab">原题（可勾选一起打印）</div>${qcard(q, 0, { open: true, noSim: true })}</div>`;
 
   const pbar = `<div class="pbar" data-scope="sim">
         <span class="pn">已选 <b data-pcount>0</b> 道</span>
@@ -587,7 +588,7 @@ function renderSim() {
         <button class="btn mini" data-pmode="both">全部打印</button>
       </div>`;
 
-  const body = pbar + head + (sims.length
+  const body = pbar + origCard + head + (sims.length
     ? `<div class="simlist">${sims.map((x, i) => qcard(x, i + 1, { solKp: null, open: state.showAns, noSim: true })).join("")}</div>`
     : `<div class="emptynote">${sel.length ? "没有同时含有这些标签的其它真题。" : "请选择至少一个标签。"}</div>`);
 

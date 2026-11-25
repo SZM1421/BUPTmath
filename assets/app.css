@@ -439,3 +439,8 @@ h1.title .no{color:var(--blue); margin-right:8px; font-variant-numeric:tabular-n
   box-shadow:0 -6px 18px rgba(0,0,0,.08);background:#fff;padding:10px 16px}
 .pbar[data-scope="sim"]{position:sticky;top:0;z-index:8;margin:0 0 12px;background:#fff;
   box-shadow:0 4px 12px rgba(0,0,0,.06)}
+
+
+/* 相似题：原题卡片 */
+.simorig{margin:0 0 14px}
+.simlab{font-family:"Microsoft YaHei",sans-serif;font-size:11px;color:#a8843c;letter-spacing:1px;margin-bottom:6px}
